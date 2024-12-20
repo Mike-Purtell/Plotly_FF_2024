@@ -120,5 +120,5 @@ fig.update_layout(
         ),
     xaxis_title='', yaxis_title='AVERAGE PRICE ($/kg)'
     )
-
+fig.write_html('Plotly_FF_2024_50_Coffee_Tea.html')
 fig.show()
