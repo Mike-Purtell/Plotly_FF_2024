@@ -67,7 +67,7 @@ df = (
 )
 
 #-------------------------------------------------------------------------------
-#    use px line to plot commodoty prices - Coffee or Tea?
+#    use px line to plot commodity prices - Coffee or Tea?
 #-------------------------------------------------------------------------------
 df_plotting = (   # add average coffee price
     df
