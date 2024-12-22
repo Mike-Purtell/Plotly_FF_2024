@@ -42,14 +42,14 @@ list_column_names = (
 #    Make a working dataframe, convert data columns from  strings to floats
 #-------------------------------------------------------------------------------
                                                                                
-data_col_names = df_source.columns[1:]
-
+data_cols = df_source.columns[1:]  # includes all columns after the first
+print()
 df = (
     df_source
     .with_row_index()
     .filter(pl.col('index') > 1)
     .drop('index')
-    .with_columns(pl.col(data_col_names).cast(pl.Float64, strict=False))
+    .with_columns(pl.col(data_cols).cast(pl.Float64, strict=False))
     .with_columns(YEAR_STR = pl.col('MONTH').str.slice(0,4))
     .with_columns(MONTH_STR = pl.col('MONTH').str.slice(-2,2))
     .with_columns(DATE_STR = (pl.col('YEAR_STR') + '-' + pl.col('MONTH_STR')))
@@ -69,6 +69,7 @@ df = (
 #-------------------------------------------------------------------------------
 #    use px line to plot commodity prices - Coffee or Tea?
 #-------------------------------------------------------------------------------
+data_cols = ['COFFEE_AVG ($/kg)', 'TEA_AVG ($/kg)']
 df_plotting = (   # add average coffee price
     df
     .with_columns(
@@ -77,13 +78,15 @@ df_plotting = (   # add average coffee price
              pl.col('COFFEE_ROBUS ($/kg)'))
             /2.0).alias('COFFEE_AVG ($/kg)')
         )
+    .with_columns(pl.col(data_cols).round(2))
 )
+
 fig = px.line(
     df_plotting,
     'DATE',
-    ['TEA_AVG ($/kg)', 'COFFEE_AVG ($/kg)'],
+    data_cols,
     template='simple_white',
-    height=400, width=800
+    height=400, width=800,
 )
 
 #-------------------------------------------------------------------------------
@@ -112,13 +115,20 @@ fig.add_annotation(
     text='<b>TEA</b>',
     font=dict(size=14, color=tea_color),
 )
+fig.update_traces(
+    hovertemplate="<br>".join([
+        '$%{y:.2f}'
+    ])
+)
 fig.update_layout(
     showlegend=False,
     title_text = (
         'COFFEE OR TEA?<br>' +
         '<sup>Coffee jitter is not just biological</sup>'
         ),
-    xaxis_title='', yaxis_title='AVERAGE PRICE ($/kg)'
+    xaxis_title='', yaxis_title='AVERAGE PRICE ($/kg)',
+    hovermode="x unified"
     )
+fig.update_layout(hovermode='x unified')
 fig.write_html('Plotly_FF_2024_50_Coffee_Tea.html')
 fig.show()
